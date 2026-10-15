@@ -64,6 +64,26 @@ test('class assertions report the observed class on failure', async ({ app, brow
   }
 });
 
+test('toHaveRole reads the engine role', async ({ app, screen }) => {
+  await app.open();
+  await expect(screen.getByRole('button', 'Increment')).toHaveRole('button');
+  await expect(screen.getByRole('heading', 'Home')).toHaveRole('heading');
+  await expect(screen.getByRole('image', 'Fixture')).toHaveRole('image');
+  await expect(screen.getByRole('list')).toHaveRole('list');
+  await expect(screen.getByLabel('Password')).toHaveRole('textbox');
+  await expect(screen.getByText('Card', { exact: true })).toHaveRole('');
+  await expect(screen.getByRole('heading', 'Home')).not.toHaveRole('button', { timeout: 200 });
+  await expect(screen.getByRole('image', 'Fixture')).not.toHaveRole('img', { timeout: 200 });
+  await app.open('/roles');
+  await expect(screen.getByRole('switch', 'Dark mode')).toHaveRole('switch');
+  await expect(screen.getByRole('switch', 'Dark mode')).not.toHaveRole('checkbox', { timeout: 200 });
+});
+
+test('toHaveRole fails on another role', async ({ app, screen }) => {
+  await app.open();
+  await expect(screen.getByRole('heading', 'Home')).toHaveRole('button', { timeout: 300 });
+});
+
 test('a textarea value compares raw', async ({ app, screen }) => {
   await app.open();
   await expect(screen.getByLabel('Notes')).toHaveValue('line1\\n\\nline2  ');
@@ -456,6 +476,7 @@ describe('web platform integration', () => {
 
   it.each([
     'deterministic queries and reads',
+    'toHaveRole reads the engine role',
     'class assertions report the observed class on failure',
     'a textarea value compares raw',
     'toHaveAttribute reads the value attribute of plain fields',
@@ -515,6 +536,14 @@ describe('web platform integration', () => {
       ['locator.tap', 'failed'],
     ]);
     expect(result.attempts[0]!.error?.code).toBe('APP_NOT_OPEN');
+  });
+
+  it('fails toHaveRole on another role and prints the role it saw', () => {
+    const result = resultByTitle(outcome, 'toHaveRole fails on another role');
+    expect(result.status).toBe('failed');
+    expect(result.attempts[0]!.error?.code).toBe('ASSERTION_FAILED');
+    expect(result.attempts[0]!.error?.message).toContain('expected: role "button"');
+    expect(result.attempts[0]!.error?.message).toContain('observed: role "heading"');
   });
 
   it('fails toHaveValue on a textarea against the raw value, and prints what it compared', () => {

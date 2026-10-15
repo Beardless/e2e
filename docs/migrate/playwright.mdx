@@ -206,7 +206,8 @@ uses it declares `requires: ['browser']` and other targets skip it. Calls on
 | `toHaveAttribute('aria-selected', 'true')`, `'aria-expanded'` | `toBeSelected()`, `toBeExpanded()` | renamed |
 | a positive matcher on several matches | `LOCATOR_AMBIGUOUS` at once, see [What differs on purpose](#what-differs-on-purpose) | by design |
 | `toBeAttached()` | the same; passes on a hidden match too | same |
-| `toBeEmpty()`, `toBeInViewport()`, `toBeEditable()`, `toHaveRole()`, `toHaveAccessibleDescription()` | not yet | missing |
+| `toHaveRole(role)` | exact string match on the engine's role; an image is `image`, and a node with no role reads as `""` | by design |
+| `toBeEmpty()`, `toBeInViewport()`, `toBeEditable()`, `toHaveAccessibleDescription()` | not yet | missing |
 | `expect(locator).toHaveClass(cls)` | `expect(browser).toHaveClass(locator, cls)`; a DOM fact is asserted through `browser`; reads the `class` attribute, so `''` matches `class=""` and not a missing attribute | web only |
 | `toHaveCSS()`, `toHaveId()`, `toHaveJSProperty()`, `toContainClass()`, `toHaveValues()` | `browser.evaluate` plus a value matcher | missing |
 | `expect(page).toHaveURL()`, `toHaveTitle()` | `expect(browser).toHaveURL()`, `toHaveTitle()`; `toHaveURL` takes `ignoreCase` | web only |
