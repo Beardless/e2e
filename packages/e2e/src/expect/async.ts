@@ -441,6 +441,26 @@ class AsyncExpectationImpl implements AsyncExpectation {
     return this.textMatcher('toHaveAccessibleName', expected, options);
   }
 
+  toHaveRole(role: string, options?: { timeout?: number }): Promise<void> {
+    this.readOptions('toHaveRole', options);
+    if (typeof role !== 'string') {
+      throw new TestError(
+        'INVALID_ARGUMENT',
+        `${this.api('toHaveRole')} role must be a string, got ${typeof role}`,
+      );
+    }
+    return this.poll(
+      {
+        name: 'toHaveRole',
+        predicate: (sample) => sample.node !== null && (sample.node.role ?? '') === role,
+        describeExpected: `role ${JSON.stringify(role)}`,
+        observed: (sample) =>
+          sample.node === null ? 'no node' : `role ${JSON.stringify(sample.node.role ?? '')}`,
+      },
+      options?.timeout,
+    );
+  }
+
   toHaveScreenshot(nameOrOptions?: string | ScreenshotOptions, options?: ScreenshotOptions): Promise<void> {
     return expectScreenshot(this.internals.context, this.internals.expression, this.negated, nameOrOptions, options);
   }

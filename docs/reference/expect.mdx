@@ -134,6 +134,12 @@ export interface AsyncExpectation {
   toHaveCount(expected: number, options?: { timeout?: number }): Promise<void>;
   /** Waits for an accessible name. */
   toHaveAccessibleName(expected: TextMatch, options?: TextMatcherOptions): Promise<void>;
+  /**
+   * Waits for the engine's role to equal `role`. The comparison is that
+   * string, exact and case-sensitive, with no ARIA hierarchy. A node stored
+   * with no role reads as `""`.
+   */
+  toHaveRole(role: string, options?: { timeout?: number }): Promise<void>;
   /** Waits for the one match to look like its stored screenshot; see [Screenshot matchers](#screenshot-matchers). */
   toHaveScreenshot(name: string, options?: ScreenshotOptions): Promise<void>;
   toHaveScreenshot(options?: ScreenshotOptions): Promise<void>;
@@ -174,6 +180,12 @@ The boolean options Playwright gives these matchers work the same way:
 and the value form of `toHaveAttribute` compares a string case-insensitively
 and adds the `i` flag to a `RegExp`; `ignoreCase: false` removes it.
 
+`toHaveRole(role)` waits for the one match's role to equal `role`. The role
+is the string the engine stored, compared exactly, case included, with no
+ARIA hierarchy: a `switch` is not a `checkbox`. An image is `image`. A node
+with no role reads as `""`. A role that is not a string, or any option but
+`timeout`, is `INVALID_ARGUMENT`.
+
 A matcher refuses any other option key, and a flag that is not a boolean, with
 `INVALID_ARGUMENT` before it reads the screen. Types catch these in
 TypeScript, but `e2e run` does not type-check, so the check runs for a
@@ -201,6 +213,7 @@ await expect(screen.getByTestId('todo')).toHaveText(['Write spec', /^Ship/, 'Rel
 await expect(screen.getByTestId('todo')).toContainText(['spec', 'runner', 'Release']);
 await expect(screen.getByTestId('todo')).toContainText(['spec', 'Release']);
 await expect(screen.getByText('Loaded')).toBeAttached();
+await expect(screen.getByTestId('save')).toHaveRole('button');
 await expect(screen.getByRole('dialog')).not.toBeVisible({ timeout: 10_000 });
 ```
 

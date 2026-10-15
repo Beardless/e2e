@@ -338,6 +338,12 @@ void asyncExpectation.toBeChecked({ indeterminate: true });
 void asyncExpectation.toHaveValue('a', { ignoreCase: true });
 // @ts-expect-error presence has no case to ignore
 void asyncExpectation.toHaveAttribute('data-kind', { ignoreCase: true });
+void asyncExpectation.toHaveRole('button', { timeout: 1000 });
+void asyncExpectation.toHaveRole('');
+// @ts-expect-error a role is a string; a RegExp is not one
+void asyncExpectation.toHaveRole(/button/);
+// @ts-expect-error toHaveRole takes no ignoreCase
+void asyncExpectation.toHaveRole('button', { ignoreCase: true });
 
 // expect.poll carries every value matcher and no other, each resolving to void.
 declare const pollMatcherNames: Exclude<keyof PollExpectation<string>, 'not'>;

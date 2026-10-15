@@ -36,6 +36,9 @@ test('every matcher passes on the scripted screen', async ({ app, screen }) => {
   await expect(screen.getByTestId('card')).toHaveAttribute('data-state', 'open');
   await expect(screen.getByTestId('card')).toHaveAttribute('class', /active/);
   await expect(screen.getByRole('list', { name: 'Todos' })).toHaveAccessibleName('Todos');
+  await expect(screen.getByRole('heading', { level: 1 })).toHaveRole('heading');
+  await expect(screen.getByRole('switch', { name: 'Dark mode' })).toHaveRole('switch');
+  await expect(screen.getByText('Hidden content')).toHaveRole('');
   await expect(screen.getByTestId('todo')).toHaveCount(3);
   await expect(screen.getByTestId('todo')).toHaveText(['Write spec', /^Ship/, 'Release']);
   await expect(screen.getByTestId('todo')).toContainText(['spec', 'runner', 'Release']);
@@ -55,6 +58,7 @@ test('negated matchers pass on the scripted screen', async ({ app, screen }) => 
   await expect(screen.getByTestId('todo')).toHaveCount(3);
   await expect(screen.getByTestId('todo')).not.toHaveCount(2, soon);
   await expect(screen.getByTestId('todo')).not.toHaveText(['Write spec', 'Ship runner'], soon);
+  await expect(screen.getByRole('button', { name: 'Submit' })).not.toHaveRole('link', soon);
 });
 
 const fast = { timeout: 50 };
@@ -149,6 +153,11 @@ test('toHaveAccessibleName fails on another name', async ({ app, screen }) => {
   await expect(screen.getByRole('list', { name: 'Todos' })).toHaveAccessibleName('Done', fast);
 });
 
+test('toHaveRole fails on another role', async ({ app, screen }) => {
+  await app.open('/');
+  await expect(screen.getByRole('heading', { level: 1 })).toHaveRole('button', fast);
+});
+
 test('toHaveCount fails on another count', async ({ app, screen }) => {
   await app.open('/');
   await expect(screen.getByTestId('todo')).toHaveCount(2, fast);
@@ -195,6 +204,7 @@ const FAILURES: [string, ...string[]][] = [
   ['toHaveAttribute fails on an absent attribute', 'expected: attribute "hidden"', 'observed: attribute "hidden" absent'],
   ['toHaveAttribute fails on another value', 'expected: attribute "data-state" "closed"', 'observed: attribute "data-state" "open"'],
   ['toHaveAccessibleName fails on another name', 'expected: accessible name "Done"', 'observed: name "Todos"'],
+  ['toHaveRole fails on another role', 'expect.toHaveRole failed', 'expected: role "button"', 'observed: role "heading"'],
   ['toHaveCount fails on another count', 'expected: count 2', 'observed: count 3 (match count 3)'],
   ['the list form of toHaveText fails on a shorter list', 'expected: text ["Write spec", "Ship runner"]', 'observed: text ["Write spec", "Ship runner", "Release"] (match count 3)'],
   ['the negated list form of toContainText fails when one match contains the entry', 'expect.not.toContainText failed', 'expected: not text containing ["runner"]'],
@@ -230,13 +240,13 @@ describe('scripted engine: expect(locator) matchers', () => {
     for (const matcher of [
       'toBeVisible', 'toBeHidden', 'toBeAttached', 'toBeEnabled', 'toBeDisabled', 'toBeChecked', 'toBeSelected',
       'toBeExpanded', 'toBeFocused', 'toHaveText', 'toContainText', 'toHaveValue', 'toHaveAttribute',
-      'toHaveAccessibleName', 'toHaveCount',
+      'toHaveAccessibleName', 'toHaveRole', 'toHaveCount',
     ]) {
       expect(apis, matcher).toContain(`expect.${matcher}`);
     }
     expect(attempt.steps.every((entry) => entry.status === 'passed')).toBe(true);
     const negated = passed(run.outcome, 'negated matchers pass on the scripted screen');
-    expect(negated.steps.filter((entry) => entry.api.startsWith('expect.not.'))).toHaveLength(4);
+    expect(negated.steps.filter((entry) => entry.api.startsWith('expect.not.'))).toHaveLength(5);
     expect(step(negated, 'expect.not.toBeVisible')).toMatchObject({ kind: 'assertion', label: 'getByText("Hidden content")' });
   });
 
